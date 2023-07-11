@@ -50,9 +50,7 @@ dependencies {
 
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-}
+
 
 //querydsl 추가 시작
 //querydsl은 내부적으로 Entity 클래스를 인식해서 그와 비슷한 모양의 Qclass를 제작합니다.
@@ -74,3 +72,7 @@ compileQuerydsl {
 	options.annotationProcessorPath = configurations.querydsl
 }
 //querydsl 추가 끝
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
