@@ -4,7 +4,10 @@ import com.example.study.entity.Member;
 import com.example.study.entity.QMember;
 import com.example.study.entity.Team;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,14 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-import static com.example.study.entity.QMember.member;
+
 
 import javax.persistence.EntityManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.study.entity.QMember.member;
 import static com.example.study.entity.QTeam.team;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -328,4 +332,35 @@ class MemberRepositoryTest {
         //then
         result.forEach(tuple -> System.out.println("tuple = " + tuple));
     }
+    @Test
+    @DisplayName("나이가 평균 나이 이상인 회원을 조회")
+    void subQueryGoe() {
+        //given
+        QMember m2 = new QMember("m2");
+        //when
+        //JPAExpressions는 from절을 제외하고, select와 where절에서 사용이 가능.
+        List<Member> result = factory.selectFrom(member).where(member.age.goe(
+                JPAExpressions.select(m2.age.avg()).from(m2)
+        )).fetch();
+        //then
+        assertEquals(result.size(), 5);
+    }
+    
+    @Test
+    @DisplayName("동적 sql 테스트")
+    void dynamicQueryTest() {
+        //given
+        String name = "member1";
+        int age = 10;
+        //when
+        List<Member> result = memberRepository.findUser(name, age);
+        //then
+        assertEquals(result.size(), 1);
+
+        System.out.println("\n\n\n");
+        result.forEach(System.out::println);
+        System.out.println("\n\n\n");
+    }
+   
+
 }
